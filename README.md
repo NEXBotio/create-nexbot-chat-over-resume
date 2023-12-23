@@ -13,6 +13,6 @@ Once you have created a bot and set up its preloaded-tokens, you have the option
 
 You will find all site configuration data in `src/config/site.ts`, this is the only file you need to modify to make this template your own.
 
-# Need mmore help?
+# Need more help?
 
 Use a bot we've specially set up to help with setting up this template at [ResumeBotHelper](bots.nexbot.io/NWIxMzA2OQ)
