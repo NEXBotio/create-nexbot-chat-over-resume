@@ -1,0 +1,10 @@
+.tocsticky {
+
+    position: sticky;
+    top: 0px;
+  }
+  
+  .tocFixed {
+    position: sticky;
+    top: 0px;
+  }
