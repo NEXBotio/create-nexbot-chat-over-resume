@@ -7,7 +7,7 @@ export default function Layout(
   props: props
 ) {
   return (
-    <div className="flex flex-grow">
+    <div className="">
       {props.children}
     </div>
   )

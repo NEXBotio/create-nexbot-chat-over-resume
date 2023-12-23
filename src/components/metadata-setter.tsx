@@ -16,18 +16,21 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 const formSchema = z.object({
-    miniId: z.string().url(
+    description:z.string(),
+    title: z.string().url(
         // "Sorry, you can only use characters that are allowed in a URL"
         ).min(5, 
             // "Your mini id needs to have at least 5 characters."
             )
 })
-export function MiniIDForm() {
+
+export function MetadataForm() {
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            miniId: "",
+            title: "",
+            description:""
         },
     })
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -40,24 +43,44 @@ export function MiniIDForm() {
                 <div className="flex flex-row items-center gap-2">
                 <FormField
                     control={form.control}
-                    name="miniId"
+                    name="title"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Mini ID</FormLabel>
+                            <FormLabel>Title</FormLabel>
                             <FormControl>
                                 <Input
-                                className="dark:bg-transparent max-w-[30vw] flex-grow h-[5vh] text-[5vw]  border-b-3"
-                                placeholder="your-mini-id" {...field} />
+                                className="bg-transparent max-w-[30vw] flex-grow h-[5vh] text-[3vw]  border-b-3"
+                                placeholder="e.g. Your Name" {...field} />
                             </FormControl>
                             <FormDescription>
-                                This is your URL.
+                            Heading of your social media preview
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
+                        
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                                <Input
+                                className="bg-transparent max-w-[30vw] flex-grow h-[5vh] text-[3vw]  text-primary-foreground border-b-3"
+                                placeholder="e.g. Something about yourself" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                            Description for your social media preview
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        
                     )}
                 />
                 <div className="mt-2  ">
-                <Button  className=" h-[5vh] text-[5vw] " type="submit">Set</Button>
+                <Button  className=" h-[5vh] text-[3vw] " type="submit">Set</Button>
                 </div>
                 </div>
             </form>
@@ -69,20 +92,27 @@ export function MiniIDForm() {
 interface props {
     className?: string
 }
-export default function AddressSetter({ className }: props) {
+export default  function MetaDataSetter({ className }: props) {
     return (
         <div
             className={cn(
                 ""
                 , className)}
         >
-            <div className="flex flex-rowbg-orange-400 items-center">
-                <h1 
-                className= 'max-w-[30vw] flex-grow h-[5vh] text-[5vw]'>mi.nimax.me/</h1>
+            <div className="\
+
+            flex flex-row  \
+            bg-orange-400 items-center">
+                <h2 
+                className= '\
+                max-w-[30vw] \
+                flex-grow \
+                h-[5vh] text-[3vw]'
+                >Title</h2>
                 <div 
                 // className="mt-2" 
                 >
-                    <MiniIDForm />
+                    <MetadataForm />
                 </div>
             </div>
         </div>

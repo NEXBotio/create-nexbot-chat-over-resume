@@ -1,0 +1,41 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+.img-placeholder {
+  width: 180px;
+  height:180px;
+  background: #cccad2;
+  border-radius: 25px;
+  padding: 10px;
+}
+
+.dash-border {
+  height: 100%;
+  width: 100%; 
+  border: 4px dashed white;
+  border-radius: 25px;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  padding: 10px 0;
+}
+
+.dash-border .plus {
+  font-size: 80px;
+  line-height: 1.3;
+}
+
+.dash-border .text {
+  font-size: 20px; 
+}
+
+.float {
+ float: left;
+ margin: 40px;
+}
+
+body {
+  background: #E1DFFF;
+}
+

@@ -6,7 +6,7 @@
         "request": "launch",
         "name": "Launch Next.js",
         "runtimeExecutable": "npm",
-        "runtimeArgs": ["run", "start"],
+        "runtimeArgs": ["run", "dev"],
         "console": "integratedTerminal",
         "env": {
           "NODE_OPTIONS": "--inspect"

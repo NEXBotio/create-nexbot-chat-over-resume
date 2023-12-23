@@ -1,10 +1,15 @@
-import type { Metadata } from 'next'
-import '@/styles/globals.css'
-import { Inter as FontSans } from "next/font/google"
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import "@/styles/globals.css";
+import { SiteHeader } from "@/components/SiteHeader";
 import { cn } from "@/lib/utils"
-import { ThemeProvider } from '@/providers/theme-provider'
-import Link from 'next/link'
-import { TailwindIndicator } from '@/components/TailwindIndicator'
+import { Footer } from "@/components/Footer";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { TailwindIndicator } from "@/components/TailwindIndicator";
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import "@/app/themes.css";
+import { siteConfig } from "@/config/site";
+import { Inter as FontSans } from "next/font/google"
+import { Metadata } from "next";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -23,37 +28,58 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}
+    <>
+    <html lang="en" suppressHydrationWarning>
+      <head >
+        {/* {(metadata.icons as any).icon.map((icon:any, index:number) => (
+          <link
+            key={index}
+            rel="icon"
+            href={(icon as any).href}
+            media={(icon as any).media}
+          />
+        ))} */}
+      </head>
+      <body className={cn(
+        "min-h-screen bg-background font-sans antialiased",
+        fontSans.variable
+      )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <header
-            className='  text-black flex-row-reverse bg-red-50 h-20 w-full flex items-center'
+
+
+
+
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
           >
-            <div className='flex mx auto mr-10 gap-3 '>
-              <div className=''>Sign up</div>
-              <div className=''>
 
-                <Link href={'/dashboard'}>Log in</Link></div>
+            <ThemeSwitcher />
+            <div className="relative flex min-h-screen  flex-col">
+              <div id={siteConfig.headerId} >
+                <SiteHeader />
+              </div>
+              <div className="w-full  md:mr-auto md:ml-auto md:min-w-[300px] md:max-w-[800px] md:px-[20px] pb-8 flex-1">
+                <div className='flex flex-grow flex-col  h-[100vh]  w-full'>
+                  <div className="mt-16">{children}</div></div></div>
+
+              <div id={siteConfig.footerId} >
+                <SpeedInsights />
+                <Footer />
+              </div>
             </div>
+            <TailwindIndicator />
 
-          </header>
-          <div className="pb-8 flex-1"><main
-            className=" container pt-20 relative  bg-green-200"
-          >{children}</main></div>)
+          </ThemeProvider>
 
-        </ThemeProvider>
-        <TailwindIndicator />
+
+
       </body>
     </html>
+  </>
+
+
   )
 }
