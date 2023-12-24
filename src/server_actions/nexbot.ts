@@ -5,7 +5,7 @@ export const fetchSingleUseChatToken = async () => {
     const resp = await fetch("https://apis.nexbot.io/web/v1/secrets/generate_single_use_token", {
         method: "GET",
         headers: {
-            Authorization: `Bearer ${process.env.NEXBOT_SECRET}`,
+            Authorization: `Bearer ${process.env.NEXBOT_SERVER_SECRET}`,
             "Content-Type": "application/json",
         },
         cache: "no-cache",
