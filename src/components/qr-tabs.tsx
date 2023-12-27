@@ -28,12 +28,12 @@ export function QRCodeTabs() {
   return (
     <Tabs defaultValue="1"  className="flex flex-col ">
       <TabsList className="h-auto overflow-x-auto">
-        {qrCodes.map(qr=>(<TabsTrigger 
+        {qrCodes.map(qr=>(<TabsTrigger key={qr}
         value={`${qr}`}>
           <QRCode/>
           </TabsTrigger>))}
       </TabsList>
-      {qrCodes.map(qr=>(<TabsContent 
+      {qrCodes.map(qr=>(<TabsContent key={qr}
         value={`${qr}`}>
           <QRCode/>
           </TabsContent>))}

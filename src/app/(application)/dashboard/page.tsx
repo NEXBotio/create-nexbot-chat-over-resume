@@ -6,7 +6,9 @@ import MetaDataSetter from "@/components/metadata-setter"
 import UploadImage from "@/components/upload-image"
 import {QRCodeTabs} from "@/components/qr-tabs"
 import { Separator } from "@/components/ui/separator"
+import { createSupaServerClient } from "@/lib/supabase-server"
 export default function Page() {
+
   return (
   <div 
   className="" 

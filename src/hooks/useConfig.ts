@@ -8,6 +8,7 @@ type Config = {
   theme: string
   radius: number
   explainerBot: string
+  activeSubscription:string|undefined
 }
 
 const configAtom = atomWithStorage<Config>("config", {
@@ -15,6 +16,7 @@ const configAtom = atomWithStorage<Config>("config", {
   theme: "gradient",
   radius: 0.5,
   explainerBot: "Technical",
+  activeSubscription:undefined,
 })
 
 export function useConfig() {

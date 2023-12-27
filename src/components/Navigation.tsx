@@ -14,7 +14,7 @@ export function MainNav() {
 
   return (
     <div className="mr-4 fixed hidden md:flex">
-      <Link href="/" className="mr-6 flex items-center space-x-2">
+      <Link href="/?noRedirect" className="mr-6 flex items-center space-x-2">
         <Icons.blackHole className="h-6 w-6" />
         <span className="hidden font-bold sm:inline-block ">
           <SiteHeaderDropDown/>

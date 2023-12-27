@@ -34,26 +34,26 @@ export async function POST(request: Request) {
 }
 
 
-export async function GET(request: Request) {
-  const { userId, filename } = await request.json();
+// export async function GET(request: Request) {
+//   const { userId, filename } = await request.json();
 
-  if (!process.env.AWS_BUCKET_NAME) {
-    return new Response(JSON.stringify({ error: 'S3 bucket name is not configured' }), { status: 500 });
-  }
+//   if (!process.env.AWS_BUCKET_NAME) {
+//     return new Response(JSON.stringify({ error: 'S3 bucket name is not configured' }), { status: 500 });
+//   }
 
-  try {
-    const client = new S3Client({ region: process.env.AWS_REGION });
-    const command = new GetObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `profileImage/${userId}/${filename}`,
-    });
+//   try {
+//     const client = new S3Client({ region: process.env.AWS_REGION });
+//     const command = new GetObjectCommand({
+//       Bucket: process.env.AWS_BUCKET_NAME,
+//       Key: `profileImage/${userId}/${filename}`,
+//     });
 
-    // Set the expiration time for the presigned URL, e.g., 60 seconds
-    const url = await getSignedUrl(client, command, { expiresIn: 60 });
+//     // Set the expiration time for the presigned URL, e.g., 60 seconds
+//     const url = await getSignedUrl(client, command, { expiresIn: 60 });
 
-    return new Response(JSON.stringify({ url }), { status: 200 });
-  } catch (error) {
-    console.error('Error generating presigned URL:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-  }
-}
+//     return new Response(JSON.stringify({ url }), { status: 200 });
+//   } catch (error) {
+//     console.error('Error generating presigned URL:', error);
+//     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+//   }
+// }

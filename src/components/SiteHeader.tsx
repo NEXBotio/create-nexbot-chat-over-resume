@@ -1,14 +1,32 @@
 import Link from "next/link"
-
-import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 // import { CommandMenu } from "@/components/CommandMenu"
 import { Icons } from "@/components/ui/icons"
 import { MainNav } from "@/components/Navigation"
 import { MobileNavigation } from "@/components/MobileNavigation"
 import { buttonVariants } from "@/components/ui/button"
+import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
+import { LogoutButton } from "./logout-button"
+import { ProfileMenu } from "./profile-menu"
 
-export function SiteHeader() {
+export async function SiteHeader() {
+
+  const cookieStore = cookies()
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,//server!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+  const handleLogOut = async () => {
+    supabase.auth.signOut()
+  }
+  const userResp = await supabase.auth.getUser()
   return (
     <header className="fixed   top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container  flex h-14 items-center">
@@ -19,8 +37,8 @@ export function SiteHeader() {
             {/* <CommandMenu /> */}
           </div>
           <nav className="flex  items-center">
-          <Link
-              href="/"
+            <Link
+              href="/?noRedirect"
               target="_blank"
               rel="noreferrer"
             >
@@ -36,7 +54,7 @@ export function SiteHeader() {
                 <span className="sr-only">home</span>
               </div>
             </Link>
-            <Link
+            {!userResp.data.user && (<Link
               href={'/signup'}
               target="_blank"
               rel="noreferrer"
@@ -52,19 +70,8 @@ export function SiteHeader() {
                 Sign up
 
               </div>
-            </Link>
-            <Link
-              href={'/dashboard'}
-              rel="noreferrer"
-            >
-              <div
-                className={
-                  "w-9 px-9  text-x"
-                }
-              >
-Login
-              </div>
-            </Link>
+            </Link>)}
+            
             {/* <Link
               href={siteConfig.links.twitter}
               target="_blank"
@@ -82,6 +89,21 @@ Login
                 <span className="sr-only">Twitter</span>
               </div>
             </Link> */}
+            <div className="hidden md:block fixed  mr-5 right-0">
+            {userResp.data.user ? (  <ProfileMenu />):<Link
+
+href={'/login'}
+rel="noreferrer"
+>
+<div
+  className={
+    "w-9 px-9  text-x"
+  }
+>
+  Login
+</div>
+</Link>}
+            </div>
           </nav>
         </div>
       </div>
