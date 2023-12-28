@@ -1,14 +1,14 @@
-import { ReactNode } from "react"
 
-interface props {
-  children: ReactNode
-}
-export default function Layout(
-  props: props
-) {
+export default async function Layout({
+  children,
+  address
+}: {
+  children: React.ReactNode,
+  address: React.ReactNode
+}) {
   return (
-    <div className="">
-      {props.children}
-    </div>
-  )
+    <>
+    {address}
+    {children}
+    </>)
 }

@@ -1,4 +1,4 @@
-// "use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Link, LogOut } from "lucide-react";
 import { createSupaServerClient } from "@/lib/supabase-server";
@@ -15,17 +15,11 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
-import { createServer } from "http";
-import { cookies } from "next/headers";
 import { LogoutButton } from "./logout-button";
 import React, { Suspense } from "react";
 
 export async function AvatarMenuButton() {
-
   const supabase = await createSupaServerClient();
-  // const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  //     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
   const userResp = await supabase.auth.getUser();
   console.log("USER", userResp.data.user?.user_metadata);
 
@@ -46,7 +40,7 @@ export async function AvatarMenuButton() {
       </Suspense>
     );
 }
-export function ProfileMenu() {
+export async function ProfileMenu() {
   return (
     <Menubar className="border-none">
       <MenubarMenu>

@@ -21,6 +21,7 @@ import { useConfig } from "@/hooks/useConfig";
 import { on } from "events";
 import { revalidatePath } from "next/cache";
 import { Skeleton } from "./ui/skeleton";
+import { getActiveAddress, getActiveSubscription, updateAddress } from "@/lib/supabase-queries";
 // Function to prepend 'http://' if necessary
 const urlFriendlyRegex = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\:[0-9]+)?(\/.*)?$/;
 
@@ -38,66 +39,8 @@ const formSchema = z.object({
 });
 
 export function MiniIDForm() {
-  const config = useConfig();
-  async function writeToAddressTable() {
-    let subscription;
-    console.log(config.activeSubscription);
-
-    if (config.activeSubscription === undefined) {
-      console.log("no subscription found");
-      // Find the first subscription where 'expiresat' is null
-      const { data: subscriptionData, error: subscriptionError } =
-        await supabase
-          .from("subscriptions")
-          .select("*")
-          .is("expiresat", "NULL")
-          .maybeSingle(); // maybeSingle returns either one record or null
-      console.log(subscriptionData);
-
-      if (subscriptionError) {
-        console.error("Error fetching subscription:", subscriptionError);
-        return;
-      }
-
-      subscription = subscriptionData;
-    } else {
-      console.log("subscription found");
-      // Fetch subscription by ID
-      const { data: subscriptionData, error: subscriptionError } =
-        await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("id", config.activeSubscription)
-          .single(); // single returns one record and throws an error if none or more than one record is found
-
-      if (subscriptionError) {
-        console.error("Error fetching subscription:", subscriptionError);
-        return;
-      }
-
-      subscription = subscriptionData.id;
-      console.log(subscription);
-      console.log(config.activeSubscription);
-    }
-
-    if (!subscription) {
-      console.log("No subscription found");
-      return;
-    }
-
-    const { data: updateAddrs, error: updateAddrsError } = await supabase
-      .from("addresses")
-      .update({ name: miniId })
-      .match({ subscription_id: subscription.id });
-    config.activeSubscription = subscription.id;
-
-    if (updateAddrsError) {
-      console.error("Error fetching address:", updateAddrsError);
-      return;
-    }
-
-    //need to remove input, replace with string url, add edit button
-  }
+  const [config,setConfig] = useConfig();
+  
   useEffect(() => {}, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -110,7 +53,8 @@ export function MiniIDForm() {
     supabase.auth.getUser().then(async (resp) => {
       const user = resp.data.user?.id;
       if (!user) return;
-      await writeToAddressTable();
+      const sub = await getActiveSubscription(supabase,config.activeSubscription)
+      const updated = await updateAddress(supabase,{name:miniId},{subscription_id:sub.id},);
       console.log(values);
     });
   }
@@ -221,51 +165,12 @@ interface props {
 }
 
 export default function AddressSetter({ className }: props) {
-  const config = useConfig();
-  async function getCurrentAddress() {
-    console.log("getting address");
-    if (typeof config.activeSubscription === "string") {
-      console.log("sub is string");
-      // Case 1: activeSubscription is a string
-      const { data, error } = await supabase
-        .from("addresses")
-        .select("*")
-        .eq("subscription_id", config.activeSubscription)
-        .single();
+   const [currentAddress, setCurrentAddress] = React.useState("");
 
-      if (error) throw error;
-      return data.name;
-    } else if (typeof config.activeSubscription === "undefined") {
-      console.log("sub is undefined");
-      console.log("no subscription found");
-      // Case 2: activeSubscription is undefined
-      const { data: subscriptionData, error: subscriptionError } =
-        await supabase
-          .from("subscriptions")
-          .select("id")
-          .is("expiresat", null)
-          .single();
-
-      if (subscriptionError) throw subscriptionError;
-      if (!subscriptionData) return null;
-
-      const { data: addressData, error: addressError } = await supabase
-        .from("addresses")
-        .select("*")
-        .eq("subscription_id", subscriptionData.id)
-        .single();
-
-      if (addressError) throw addressError;
-      return addressData.name;
-    }
-    return "";
-  }
-
-  const [currentAddress, setCurrentAddress] = React.useState("");
   useEffect(() => {
     async function getAddress() {
-      const address = await getCurrentAddress();
-      setCurrentAddress(address);
+      const address = await getActiveAddress(supabase)
+      setCurrentAddress(address.name);
       setHasLoaded(true);
     }
     getAddress();

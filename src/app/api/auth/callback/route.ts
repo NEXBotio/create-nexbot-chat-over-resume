@@ -42,6 +42,7 @@ export async function GET(request: Request) {
 
     }
     if (!error) {
+
       return NextResponse.redirect(`${origin}${next}`)
     }
   }

@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { browserClient as supabase } from '@/lib/supabase-client'
 
 export default function UploadImage() {
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        const user = await supabase.auth.getUser()
+        const userId = user?.data.user?.id
         e.preventDefault()
 console.log('in function')
 console.log(file)
@@ -25,7 +28,7 @@ console.log('will upload',process.env.BASE_URL )
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ filename: file.name, contentType: file.type,userId:'hello' }),
+                body: JSON.stringify({ filename: file.name, contentType: file.type,userId:userId }),
             }
         )
 

@@ -19,7 +19,7 @@ export default async function AuthenticationPage() {
   const supabase = await createSupaServerClient()
   const userResp = await supabase.auth.getUser()
   if (userResp.data.user) {
-    redirect("/dashboard")
+    redirect(`/dashboard`)
   }
   return (
     <>
