@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import React from "react";
+import React, { Suspense, use, useEffect } from "react";
 import { debounce } from "lodash";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { browserClient as supabase } from "@/lib/supabase-client";
 import { useConfig } from "@/hooks/useConfig";
 import { on } from "events";
+import { revalidatePath } from "next/cache";
+import { Skeleton } from "./ui/skeleton";
 // Function to prepend 'http://' if necessary
 const urlFriendlyRegex = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\:[0-9]+)?(\/.*)?$/;
 
@@ -34,65 +36,69 @@ const formSchema = z.object({
       // "Your mini id needs to have at least 5 characters."
     ),
 });
+
 export function MiniIDForm() {
-    const config = useConfig();
-    async function getSubscriptionAndAddress() {
-        let subscription;
-        console.log(config.activeSubscription)
-        
-        if (config.activeSubscription === undefined) {
-            console.log('no subscription found')
-          // Find the first subscription where 'expiresat' is null
-          const { data: subscriptionData, error: subscriptionError } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .is('expiresat', 'NULL')
-            .maybeSingle(); // maybeSingle returns either one record or null
-            console.log(subscriptionData)
-      
-          if (subscriptionError) {
-            console.error('Error fetching subscription:', subscriptionError);
-            return;
-          }
-      
-          subscription = subscriptionData;
-        } else {
-            console.log('subscription found')
-          // Fetch subscription by ID
-          const { data: subscriptionData, error: subscriptionError } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .eq('id', config.activeSubscription)
-            .single(); // single returns one record and throws an error if none or more than one record is found
-      
-          if (subscriptionError) {
-            console.error('Error fetching subscription:', subscriptionError);
-            return;
-          }
-      
-          subscription = subscriptionData.id;
-          console.log(subscription)
-          console.log(config.activeSubscription)
-        }
-      
-        if (!subscription) {
-          console.log('No subscription found');
-          return;
-        }
+  const config = useConfig();
+  async function writeToAddressTable() {
+    let subscription;
+    console.log(config.activeSubscription);
+
+    if (config.activeSubscription === undefined) {
+      console.log("no subscription found");
+      // Find the first subscription where 'expiresat' is null
+      const { data: subscriptionData, error: subscriptionError } =
+        await supabase
+          .from("subscriptions")
+          .select("*")
+          .is("expiresat", "NULL")
+          .maybeSingle(); // maybeSingle returns either one record or null
+      console.log(subscriptionData);
+
+      if (subscriptionError) {
+        console.error("Error fetching subscription:", subscriptionError);
+        return;
+      }
+
+      subscription = subscriptionData;
+    } else {
+      console.log("subscription found");
+      // Fetch subscription by ID
+      const { data: subscriptionData, error: subscriptionError } =
+        await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("id", config.activeSubscription)
+          .single(); // single returns one record and throws an error if none or more than one record is found
+
+      if (subscriptionError) {
+        console.error("Error fetching subscription:", subscriptionError);
+        return;
+      }
+
+      subscription = subscriptionData.id;
+      console.log(subscription);
+      console.log(config.activeSubscription);
+    }
+
+    if (!subscription) {
+      console.log("No subscription found");
+      return;
+    }
 
     const { data: updateAddrs, error: updateAddrsError } = await supabase
-    .from('addresses')
-    .update({ name: miniId })
-    .match({'subscription_id': subscription.id})
+      .from("addresses")
+      .update({ name: miniId })
+      .match({ subscription_id: subscription.id });
+    config.activeSubscription = subscription.id;
 
-  if (updateAddrsError) {
-    console.error('Error fetching address:', updateAddrsError);
-    return;
+    if (updateAddrsError) {
+      console.error("Error fetching address:", updateAddrsError);
+      return;
+    }
+
+    //need to remove input, replace with string url, add edit button
   }
-
-//need to remove input, replace with string url, add edit button
-}
-
+  useEffect(() => {}, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -104,7 +110,7 @@ export function MiniIDForm() {
     supabase.auth.getUser().then(async (resp) => {
       const user = resp.data.user?.id;
       if (!user) return;
-      await getSubscriptionAndAddress()
+      await writeToAddressTable();
       console.log(values);
     });
   }
@@ -130,10 +136,10 @@ export function MiniIDForm() {
   }, [debouncedCheckDatabase]);
   async function checkDatabaseForMiniId(miniId: string) {
     const { data: links, error } = await supabase
-    .from("public_links")
-    .select("*")
-    .eq("name", miniId);
-    console.log(miniId)
+      .from("public_links")
+      .select("*")
+      .eq("name", miniId);
+    console.log(miniId);
     console.log(links);
     if (links) {
       return links.length > 0;
@@ -186,7 +192,6 @@ export function MiniIDForm() {
                       handleInputChange(e);
                       field.onChange(e); // Update React Hook Form's state
                     }}
-                    
                     value={field.value} // Bind field value
                   />
                 </FormControl>
@@ -197,9 +202,11 @@ export function MiniIDForm() {
             )}
           />
           <div className="mt-2  ">
-            <Button 
-            disabled={isCheckingDb||!isValid||!isUnique}
-            className=" h-[5vh] text-[5vw] " type="submit">
+            <Button
+              disabled={isCheckingDb || !isValid || !isUnique}
+              className=" h-[5vh] text-[5vw] "
+              type="submit"
+            >
               Set
             </Button>
           </div>
@@ -212,15 +219,86 @@ export function MiniIDForm() {
 interface props {
   className?: string;
 }
+
 export default function AddressSetter({ className }: props) {
+  const config = useConfig();
+  async function getCurrentAddress() {
+    console.log("getting address");
+    if (typeof config.activeSubscription === "string") {
+      console.log("sub is string");
+      // Case 1: activeSubscription is a string
+      const { data, error } = await supabase
+        .from("addresses")
+        .select("*")
+        .eq("subscription_id", config.activeSubscription)
+        .single();
+
+      if (error) throw error;
+      return data.name;
+    } else if (typeof config.activeSubscription === "undefined") {
+      console.log("sub is undefined");
+      console.log("no subscription found");
+      // Case 2: activeSubscription is undefined
+      const { data: subscriptionData, error: subscriptionError } =
+        await supabase
+          .from("subscriptions")
+          .select("id")
+          .is("expiresat", null)
+          .single();
+
+      if (subscriptionError) throw subscriptionError;
+      if (!subscriptionData) return null;
+
+      const { data: addressData, error: addressError } = await supabase
+        .from("addresses")
+        .select("*")
+        .eq("subscription_id", subscriptionData.id)
+        .single();
+
+      if (addressError) throw addressError;
+      return addressData.name;
+    }
+    return "";
+  }
+
+  const [currentAddress, setCurrentAddress] = React.useState("");
+  useEffect(() => {
+    async function getAddress() {
+      const address = await getCurrentAddress();
+      setCurrentAddress(address);
+      setHasLoaded(true);
+    }
+    getAddress();
+  }, []);
+  const [inEditMode, setInEditMode] = React.useState(false);
+  const [editMessage, setEditMessage] = React.useState("edit");
+  const handleEdit = () => {
+    if (inEditMode) {
+      setInEditMode(false);
+      setEditMessage("edit");
+    } else {
+      setInEditMode(true);
+      setEditMessage("ok");
+    }
+  };
+  const [hasLoaded, setHasLoaded] = React.useState(false);
   return (
     <div className={cn("", className)}>
       <div className="flex flex-row bg-orange-400 items-center">
-        <h1 className="  text-[5vw]">mi.nimax.me/</h1>
+        <h1 className="  text-[5vw]">{`mi.nimax.me/${
+          currentAddress && !inEditMode ? currentAddress : ""
+        }`}</h1>
         <div
         // className="mt-2"
         >
-          <MiniIDForm />
+          {currentAddress ? (
+            <button onClick={handleEdit}>{editMessage}</button>
+          ) : !hasLoaded ? (
+            <Skeleton className="w-[10vw] h-[15vh]" />
+          ) : (
+            <MiniIDForm />
+          )}
+          {inEditMode && <MiniIDForm />}
         </div>
       </div>
     </div>

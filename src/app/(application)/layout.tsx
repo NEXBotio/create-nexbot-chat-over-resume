@@ -58,14 +58,14 @@ export default function RootLayout({
 
             <ThemeSwitcher />
             <div className="relative flex min-h-screen  flex-col">
-              <div id={siteConfig.headerId} >
+              <div  >
                 <SiteHeader />
               </div>
               <div className="w-full  md:mr-auto md:ml-auto md:min-w-[300px] md:max-w-[800px] md:px-[20px] pb-8 flex-1">
                 <div className='flex flex-grow flex-col  h-[100vh]  w-full'>
                   <div className="mt-16">{children}</div></div></div>
 
-              <div id={siteConfig.footerId} >
+              <div >
                 <SpeedInsights />
                 <Footer />
               </div>

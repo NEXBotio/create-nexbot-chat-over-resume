@@ -1,64 +1,80 @@
 // "use client"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Check, Link, LogOut } from "lucide-react";
+import { createSupaServerClient } from "@/lib/supabase-server";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-  } from "@/components/ui/avatar"
-  import {Check, Link,LogOut} from "lucide-react"
-  import { createSupaServerClient } from "@/lib/supabase-server"
-import {
-    Menubar,
-    MenubarContent,
-    MenubarItem,
-    MenubarMenu,
-    MenubarSeparator,
-    MenubarShortcut,
-    MenubarSub,
-    MenubarSubContent,
-    MenubarSubTrigger,
-    MenubarTrigger,
-  } from "@/components/ui/menubar"
-import { createBrowserClient, createServerClient } from "@supabase/ssr"
-import { createServer } from "http"
-import { cookies } from "next/headers"
-import { LogoutButton } from "./logout-button"
-  
-  export async function AvatarMenuButton(){
-    const supabase = await createSupaServerClient()
-// const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,
-//     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-    const userResp = await supabase.auth.getUser()
-    console.log('USER',userResp.data.user?.user_metadata)
-    
-const fallbackName = userResp.data.user?.user_metadata?.full_name?.split(' ').map((n:string)=>n[0]).join('')
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import { createBrowserClient, createServerClient } from "@supabase/ssr";
+import { createServer } from "http";
+import { cookies } from "next/headers";
+import { LogoutButton } from "./logout-button";
+import React, { Suspense } from "react";
+
+export async function AvatarMenuButton() {
+
+  const supabase = await createSupaServerClient();
+  // const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  //     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const userResp = await supabase.auth.getUser();
+  console.log("USER", userResp.data.user?.user_metadata);
+
+  const fallbackName = userResp.data.user?.user_metadata?.full_name
+    ?.split(" ")
+    .map((n: string) => n[0])
+    .join("");
     return (
-        <Avatar>
-        <AvatarImage className="rounded-none" src={userResp.data.user?.user_metadata.picture} alt={userResp.data.user?.user_metadata.user_name} />
-        <AvatarFallback>{fallbackName}</AvatarFallback>
+      <Suspense fallback={<Skeleton className="w-8 h-8" />}>
+      <Avatar>
+        <AvatarImage
+          className="rounded-none"
+          src={userResp.data.user?.user_metadata.picture}
+          alt={userResp.data.user?.user_metadata.user_name}
+        />
+        <AvatarFallback>{<Skeleton > {fallbackName}</Skeleton>}</AvatarFallback>
       </Avatar>
-    )
-  }
-  export function ProfileMenu() {
-    return (
-      <Menubar className="border-none">
-        <MenubarMenu>
-          <MenubarTrigger><AvatarMenuButton/></MenubarTrigger>
-          <MenubarContent>
-            <MenubarSub>
-              <MenubarSubTrigger>    <Link className="mr-2 h-4 w-4"/><span>Links</span></MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem><Check/><span> Email link</span></MenubarItem>
-                <MenubarItem>Messages</MenubarItem>
-                <MenubarItem>Notes</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>New Link</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
-            <MenubarSeparator />
-          <LogoutButton/>
-          </MenubarContent>
-        </MenubarMenu>
-      </Menubar>
-    )
-  }
-  
+      </Suspense>
+    );
+}
+export function ProfileMenu() {
+  return (
+    <Menubar className="border-none">
+      <MenubarMenu>
+        <MenubarTrigger>
+          <AvatarMenuButton />
+        </MenubarTrigger>
+        <MenubarContent>
+          <MenubarSub>
+            <MenubarSubTrigger>
+              {" "}
+              <Link className="mr-2 h-4 w-4" />
+              <span>Links</span>
+            </MenubarSubTrigger>
+            <MenubarSubContent>
+              <MenubarItem>
+                <Check />
+                <span> Email link</span>
+              </MenubarItem>
+              <MenubarItem>Messages</MenubarItem>
+              <MenubarItem>Notes</MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem>New Link</MenubarItem>
+            </MenubarSubContent>
+          </MenubarSub>
+          <MenubarSeparator />
+          <LogoutButton />
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
+  );
+}
